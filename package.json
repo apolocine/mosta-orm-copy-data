@@ -1,0 +1,33 @@
+{
+  "name": "@mostajs/orm-copy-data",
+  "version": "0.2.1",
+  "description": "Cross-dialect data copy — 1 source (DB/CSV/JSON/SQL) → N destinations (DB/SQL dump/JSON/CSV). Backup, migration, seeding. CLI + API. Cron-ready.",
+  "author": "Dr Hamid MADANI <drmdh@msn.com>",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "mostajs-copy": "bin/mostajs-copy.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "bin", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "@mostajs/orm": ">=1.11.0"
+  },
+  "devDependencies": {
+    "@mostajs/orm": "^1.12.1",
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  },
+  "keywords": ["orm", "copy", "backup", "migration", "cross-dialect", "csv", "json", "sql", "dump", "cron", "mosta"]
+}
