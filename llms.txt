@@ -1,0 +1,76 @@
+# @mostajs/orm-copy-data — fiche LLM
+> Copie de données inter-dialectes — 1 source (DB/CSV/JSON/SQL) → N destinations (DB/SQL dump/JSON/CSV).
+
+- Version: 0.2.1 · Licence: AGPL-3.0-or-later · Auteur: Dr Hamid MADANI <drmdh@msn.com>
+- Chemin: mostajs/mosta-orm-copy-data · Statut audit: complet (dist/)
+
+## RÔLE
+Moteur de copie de données fan-out : lit une source unique (base de données, CSV, JSON,
+fichier SQL) et écrit le contenu vers plusieurs destinations hétérogènes (base de données,
+dump SQL, JSON, CSV) en une opération. Usages : backup, migration inter-SGBD, seeding.
+Disponible en API et en CLI (`mostajs-copy`), prêt pour cron. S'appuie sur les EntitySchema
+de @mostajs/orm pour comprendre les entités à copier.
+
+## INSTALLATION
+npm i @mostajs/orm-copy-data
+(peerDep : @mostajs/orm >=1.11.0)
+
+## EXPORTS
+- copyData — orchestrateur principal (source → N destinations)
+- Loaders : loadFromDb, loadFromJson, loadFromCsv, loadFromSql
+- Writers : writeToDb, writeToSql, writeToJson, writeToCsv
+- Types : SourceConfig, DestConfig, CopyOptions, CopyResult, CopyStats, SourceType, DestType
+- Bin : `mostajs-copy` -> bin/mostajs-copy.mjs
+
+## API — SIGNATURES
+- copyData(params: {
+    source: SourceConfig,
+    destinations: DestConfig[],
+    schemas: EntitySchema[],
+    options?: CopyOptions,
+  }): Promise<CopyResult>
+- loadFromDb / loadFromJson / loadFromCsv / loadFromSql — lecteurs unitaires par format
+- writeToDb / writeToSql / writeToJson / writeToCsv — écrivains unitaires par format
+
+## TYPES CLÉS
+- SourceType = 'db' | 'csv' | 'json' | 'sql'
+- DestType = 'db' | 'csv' | 'json' | 'sql-dump'
+- SourceConfig : { type: SourceType, dialect?, uri?, file?, schemas?: EntitySchema[] }
+- DestConfig : { type: DestType, dialect?, uri?, file?, createDb?, createTables? }
+- CopyOptions : { batchSize?, entities?: string[],
+  onProgress?(entity, copied, total), onLog?(msg) }
+- CopyStats : { entity, copied, errors, durationMs }
+- CopyResult : { source, destinations: string[], stats: CopyStats[],
+  totalCopied, totalErrors, durationMs }
+
+## PATTERN
+```ts
+import { copyData } from '@mostajs/orm-copy-data';
+import { UserSchema, OrderSchema } from './schemas';
+
+const result = await copyData({
+  source:       { type: 'db', dialect: 'mongodb', uri: process.env.MONGO_URL },
+  destinations: [
+    { type: 'db',       dialect: 'postgres', uri: process.env.PG_URL, createTables: true },
+    { type: 'sql-dump', file: './backup/dump.sql' },
+    { type: 'json',     file: './backup/data.json' },
+  ],
+  schemas: [UserSchema, OrderSchema],
+  options: { batchSize: 500, onProgress: (e, c, t) => console.log(`${e}: ${c}/${t}`) },
+});
+console.log(result.totalCopied, result.totalErrors);
+```
+
+## DÉPEND DE
+- @mostajs/orm (peerDep — fournit EntitySchema et l'accès aux dialectes)
+
+## PIÈGES
+- `copyData` exige `schemas: EntitySchema[]` au niveau racine ; `SourceConfig.schemas` est
+  un champ distinct optionnel propre à la config source.
+- Pour une destination `db`, utiliser `createTables: true` (et `createDb: true` si besoin)
+  si la base cible est vide — sinon les écritures échoueront sur tables absentes.
+- `destinations` est un tableau : la même source peut alimenter plusieurs cibles d'un coup.
+- `entities` dans CopyOptions filtre les entités copiées (par défaut : toutes les `schemas`).
+
+## RÉFÉRENCES
+- README.md · docs/MONITORING.md

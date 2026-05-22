@@ -16,7 +16,13 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "bin", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE",
+    "llms.txt"
+  ],
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build"
@@ -29,5 +35,17 @@
     "typescript": "^5.6.0",
     "@types/node": "^22.0.0"
   },
-  "keywords": ["orm", "copy", "backup", "migration", "cross-dialect", "csv", "json", "sql", "dump", "cron", "mosta"]
+  "keywords": [
+    "orm",
+    "copy",
+    "backup",
+    "migration",
+    "cross-dialect",
+    "csv",
+    "json",
+    "sql",
+    "dump",
+    "cron",
+    "mosta"
+  ]
 }
